@@ -3,9 +3,11 @@ package com.myproject.angularspring.controller;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.myproject.angularspring.dto.AdDto;
+import com.myproject.angularspring.dto.ReservationDto;
 import com.myproject.angularspring.services.company.CompanyService;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -68,5 +70,19 @@ public class CompanyController {
             return ResponseEntity.status(HttpStatus.OK).build();
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+    @GetMapping("/bookings/{companyId}")
+    public ResponseEntity<List<ReservationDto>> getAllBookingsByClient(@PathVariable Long companyId) {
+        return ResponseEntity.ok(companyService.getAllAdBookings(companyId));
+    }
+
+    @GetMapping("/booking/{bookingId}/{status}")
+    public ResponseEntity<?> changeBookingStatus(@PathVariable Long bookingId, @PathVariable String status) {
+        boolean success = companyService.changeBookingStatus(bookingId, status);
+        if (success) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }

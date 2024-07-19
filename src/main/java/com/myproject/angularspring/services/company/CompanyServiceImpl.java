@@ -2,6 +2,7 @@ package com.myproject.angularspring.services.company;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -9,12 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.myproject.angularspring.dto.AdDto;
+import com.myproject.angularspring.dto.ReservationDto;
 import com.myproject.angularspring.entities.Ad;
+import com.myproject.angularspring.entities.Reservation;
 import com.myproject.angularspring.entities.User;
+import com.myproject.angularspring.enums.ReservationStatus;
 import com.myproject.angularspring.repository.AdRepository;
+import com.myproject.angularspring.repository.ReservationRepository;
 import com.myproject.angularspring.repository.UserRepository;
-
-import jakarta.persistence.Id;
 
 @Service
 public class CompanyServiceImpl implements CompanyService{
@@ -24,6 +27,9 @@ public class CompanyServiceImpl implements CompanyService{
 
     @Autowired
     private AdRepository adRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     public boolean postAd(Long userId, AdDto adDto) throws IOException{
         Optional<User> optionalUser = userRepository.findById(userId);
@@ -74,6 +80,26 @@ public class CompanyServiceImpl implements CompanyService{
         if (optionalAd.isPresent()) {
             Ad ad = optionalAd.get();
             adRepository.delete(ad);
+            return true;
+        }
+        return false;
+    }
+
+    public List<ReservationDto> getAllAdBookings(Long companyId){
+        return reservationRepository.findAllByCompanyId(companyId)
+            .stream().map(Reservation::getDto).collect(Collectors.toList());
+    }
+
+    public boolean changeBookingStatus(Long bookingId, String status){
+        Optional<Reservation> optionalReservation = reservationRepository.findById(bookingId);
+        if (optionalReservation.isPresent()) {
+            Reservation existingReservation = optionalReservation.get();
+            if (Objects.equals(status, "Approve")) {
+                existingReservation.setReservationStatus(ReservationStatus.APPROVED);
+            } else {
+                existingReservation.setReservationStatus(ReservationStatus.REJECTED);
+            }
+            reservationRepository.save(existingReservation);
             return true;
         }
         return false;
