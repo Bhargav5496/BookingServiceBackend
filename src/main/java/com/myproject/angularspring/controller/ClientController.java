@@ -3,6 +3,7 @@ package com.myproject.angularspring.controller;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.myproject.angularspring.dto.ReservationDto;
+import com.myproject.angularspring.dto.ReviewDto;
 import com.myproject.angularspring.services.client.ClientService;
 
 import java.util.List;
@@ -51,5 +52,14 @@ public class ClientController {
     @GetMapping("/my-bookings/{userId}")
     public ResponseEntity<List<ReservationDto>> getAllBookingsByCompany(@PathVariable Long userId) {
         return ResponseEntity.ok(clientService.getAllAdBookings(userId));
+    }
+
+    @PostMapping("/review")
+    public ResponseEntity<?> postReview(@RequestBody ReviewDto reviewDto) {
+        Boolean success = clientService.giveReview(reviewDto);
+        if (success) {
+            return ResponseEntity.status(HttpStatus.OK).build();
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 } 
